@@ -7,10 +7,11 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 include(FetchContent)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+
 FetchContent_Declare(
     moku
     GIT_REPOSITORY https://github.com/gn0rrbitberrenbur/moku.git
-    GIT_TAG        v0.0.5
+    GIT_TAG        v0.0.7
     GIT_SHALLOW    TRUE
 )
 FetchContent_MakeAvailable(moku)
@@ -20,10 +21,17 @@ find_package(Threads REQUIRED)
 
 pybind11_add_module(_core
     src/bindings.cpp
-    ${moku_SOURCE_DIR}/src/benchmark.cpp
+    ${moku_SOURCE_DIR}/moku/benchmark/benchmark.cpp
+    ${moku_SOURCE_DIR}/moku/game/tools/algebraic_to_index.cpp
+    ${moku_SOURCE_DIR}/moku/game/board.cpp
+    ${moku_SOURCE_DIR}/moku/eval/evaluation.cpp
+    ${moku_SOURCE_DIR}/moku/search/minimax.cpp
+    ${moku_SOURCE_DIR}/moku/tt/transposition_table.cpp
 )
 
-target_link_libraries(_core PRIVATE moku_core Threads::Threads)
-target_include_directories(_core PRIVATE ${moku_SOURCE_DIR}/include)
+target_include_directories(_core PRIVATE
+    ${moku_SOURCE_DIR}/moku
+)
 
+target_link_libraries(_core PRIVATE Threads::Threads)
 install(TARGETS _core LIBRARY DESTINATION pymoku)

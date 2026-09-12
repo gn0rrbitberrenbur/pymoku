@@ -1,17 +1,19 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>
-#include "board.hpp"
-#include "minimax/minimax.hpp"
-#include "minimax/evaluation.hpp"
-#include "minimax/transposition_table.hpp"
+
 #include "config.hpp"
-#include "utils.hpp"
-#include "benchmark.hpp"
+#include "game/board.hpp"
+#include "game/tools/algebraic_to_index.hpp"
+#include "search/minimax.hpp"
+#include "eval/evaluation.hpp"
+#include "tt/transposition_table.hpp"
+#include "benchmark/benchmark.hpp"
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(_core, m) {
+PYBIND11_MODULE(_core, m)
+{
     py::class_<Board>(m, "Board")
         .def(py::init<>())
         .def("make_move", &Board::make_move, py::arg("pos"), py::arg("is_black"))
@@ -25,16 +27,16 @@ PYBIND11_MODULE(_core, m) {
         .def("pos", &Board::pos, py::arg("row"), py::arg("col"))
         .def("row", &Board::row, py::arg("pos"))
         .def("col", &Board::col, py::arg("pos"))
-        .def("legal_moves", [](const Board& b) {
+        .def("legal_moves", [](const Board &b)
+             {
             std::vector<int> moves;
             int n = b.squares();
             moves.reserve(n);
             for (int p = 0; p < n; ++p)
                 if (!b.test_pos(p)) moves.push_back(p);
-            return moves;
-        }
-    )
-        .def("to_numpy", [](const Board& b) {
+            return moves; })
+        .def("to_numpy", [](const Board &b)
+             {
             int s = b.size();
             py::array_t<int8_t> arr({2, s, s});
             auto buf = arr.mutable_unchecked<3>();
@@ -44,9 +46,7 @@ PYBIND11_MODULE(_core, m) {
                     buf(0, r, c) = b.black[p] ? 1 : 0;
                     buf(1, r, c) = b.white[p] ? 1 : 0;
                 }
-            return arr;
-        }
-    );
+            return arr; });
 
     py::class_<RootCandidate>(m, "RootCandidate")
         .def_readonly("move", &RootCandidate::move)
@@ -98,18 +98,19 @@ PYBIND11_MODULE(_core, m) {
         .def_readwrite("cores", &GameConfig::cores)
         .def("squares", &GameConfig::squares);
 
-    m.def("get_config", []() -> GameConfig& { return g_config; },
-          py::return_value_policy::reference);
+    m.def("get_config", []() -> GameConfig &
+          { return g_config; }, py::return_value_policy::reference);
 
-    m.def("set_board_size", [](int n) {
+    m.def("set_board_size", [](int n)
+          {
         if (n < 5 || n > MAX_SIZE)
             throw std::out_of_range("board size must be 5..19");
-        g_config.board_size = n;
-    }, py::arg("n"));
-    m.def("get_board_size", []() { return g_config.board_size; });
+        g_config.board_size = n; }, py::arg("n"));
+    m.def("get_board_size", []()
+          { return g_config.board_size; });
     m.def("algebraic_to_index", &algebraic_to_index,
           py::arg("input"), py::arg("size") = 0);
-        
+
     py::class_<BenchResult>(m, "BenchResult")
         .def_readonly("name", &BenchResult::name)
         .def_readonly("reached_depth", &BenchResult::reached_depth)
