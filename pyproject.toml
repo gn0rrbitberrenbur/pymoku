@@ -1,0 +1,23 @@
+[build-system]
+requires = ["scikit-build-core>=0.10", "pybind11>=2.13", "pybind11-mkdoc", "libclang"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "pymoku"
+version = "0.0.5"
+description = "Python bindings for the moku engine"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { file = "LICENSE" }
+dependencies = ["numpy<2.5"]
+
+[tool.scikit-build]
+cmake.version = ">=3.15"
+wheel.packages = ["python/pymoku"]
+
+[tool.cibuildwheel]
+build = ["cp310-*", "cp311-*", "cp312-*", "cp313-*"]
+skip = ["pp*"]
+
+test-requires = ["numpy", "pytest"]
+test-command = "pytest {project}/tests/test_pymoku.py -q"
