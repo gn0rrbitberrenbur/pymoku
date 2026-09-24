@@ -6,10 +6,11 @@ The project provides a C++17 engine exposed to Python through `pybind11`. It inc
 
 ## Requirements
 
-- Python 3.8 or newer
+- Python 3.10 or newer
 - A C++17 compiler
 - CMake 3.15 or newer
 - NumPy
+- Pytest
 
 The C++ dependency `moku` is downloaded automatically by CMake from GitHub.
 
